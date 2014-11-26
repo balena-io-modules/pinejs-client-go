@@ -1,0 +1,38 @@
+package resin
+
+type Application struct {
+	Id            int      `json:"id"`
+	AppName       string   `json:"app_name"`
+	GitRepository string   `json:"git_repository"`
+	Commit        string   `json:"commit"`
+	Devices       []Device `json:"device"`
+	Devices2      *Device  `json:"device"`
+}
+
+type Device struct {
+	Id                   int          `json:"id"`
+	Name                 string       `json:"name"`
+	DeviceType           string       `json:"device_type"`
+	UUID                 string       `json:"uuid"`
+	Commit               string       `json:"commit"`
+	Note                 string       `json:"note"`
+	Status               string       `json:"status"`
+	IsOnline             int          `json:"is_online"`
+	LastSeenTime         string       `json:"last_seen_time"`
+	IPAddress            string       `json:"ip_address"`
+	VPNAddress           string       `json:"vpn_address"`
+	OSVersion            string       `json:"os_version"`
+	SupervisorVersion    string       `json:"supervisor_version"`
+	ProvisioningProgress string       `json:"provisioning_progress"`
+	ProvisioningState    string       `json:"provisioning_state"`
+	Application          *Application `json:"application"`
+}
+
+type EnvironmentVariable struct {
+	Id    int    `json:"id" pinejs:"environment_variable"`
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
+type User struct {
+}
