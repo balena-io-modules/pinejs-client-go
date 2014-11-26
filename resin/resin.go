@@ -6,7 +6,6 @@ type Application struct {
 	GitRepository string   `json:"git_repository"`
 	Commit        string   `json:"commit"`
 	Devices       []Device `json:"device"`
-	Devices2      *Device  `json:"device"`
 }
 
 type Device struct {

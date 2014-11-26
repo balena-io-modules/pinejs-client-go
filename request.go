@@ -45,7 +45,7 @@ func (a *Client) request(method, path string, query *url.Values, body *url.Value
 	res, err := http.DefaultClient.Do(req)
 
 	if err != nil {
-		log.Printf("Request to Stripe failed: %v\n", err)
+		log.Printf("Request failed: %v\n", err)
 		return err
 	}
 	defer res.Body.Close()
