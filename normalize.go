@@ -7,7 +7,7 @@ import (
 )
 
 func normalizeField(data interface{}, s *structs.Struct) interface{} {
-
+	return nil
 }
 
 func normalize(data interface{}, s *structs.Struct) interface{} {
@@ -19,9 +19,11 @@ func normalize(data interface{}, s *structs.Struct) interface{} {
 		}
 	case map[string]interface{}:
 		fmt.Println("data was an object")
-		fields = s.Map()
+		fields := s.Map()
 		for k, v := range vv {
-			vv[k] = normalize(v, fields[k])
+			vv[k] = normalize(v, fields[k].(*structs.Struct))
 		}
 	}
+
+	return nil
 }
