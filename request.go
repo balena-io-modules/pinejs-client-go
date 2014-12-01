@@ -59,7 +59,7 @@ func (a *Client) request(method, path string, query *url.Values, body *url.Value
 	json.Unmarshal(resBody, &e)
 
 	fmt.Println(e.Data)
-	normalize(e.Data, structs.New(resourceFromSlice(v)))
+	normalise(e.Data, structs.New(resourceFromSlice(v)))
 
 	// json.Unmarshal(json.Marshal(data), v)
 	return
