@@ -16,7 +16,7 @@ type Device struct {
 	Commit               string       `json:"commit"`
 	Note                 string       `json:"note"`
 	Status               string       `json:"status"`
-	IsOnline             int          `json:"is_online"`
+	IsOnline             bool         `json:"is_online"`
 	LastSeenTime         string       `json:"last_seen_time"`
 	IPAddress            string       `json:"ip_address"`
 	VPNAddress           string       `json:"vpn_address"`
