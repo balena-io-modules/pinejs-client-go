@@ -1,6 +1,15 @@
 package pinejs
+
 import (
+	"bytes"
 	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
+	"net/url"
+	"reflect"
+	"strings"
+
 	"github.com/bitly/go-simplejson"
 )
 
