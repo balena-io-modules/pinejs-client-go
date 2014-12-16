@@ -25,6 +25,7 @@ type Device struct {
 	ProvisioningProgress string       `json:"provisioning_progress"`
 	ProvisioningState    string       `json:"provisioning_state"`
 	Application          *Application `json:"application"`
+	User                 *User        `json:"user"`
 }
 
 type EnvironmentVariable struct {
