@@ -21,6 +21,28 @@ var (
 	logDebug *log.Logger // Defaults to /dev/null in init()
 	nullFile *os.File
 )
+
+func init() {
+	var err error
+	if nullFile, err = os.Open(os.DevNull); err != nil {
+		ShowDebugOutput()
+		logDebug.Printf("Can't open null output at %s, defaulting to debug logs on.",
+			os.DevNull)
+	} else {
+		// Default to no debug output.
+		logDebug = log.New(nullFile, "", 0)
+	}
+}
+
+// ShowDebugOutput enables the debug logger, outputting to stderr.
+func ShowDebugOutput() {
+	if nullFile != nil {
+		nullFile.Close()
+		nullFile = nil
+	}
+
+	logDebug = log.New(os.Stderr, "", logFlagsDebug)
+}
 type Client struct {
 	APIKey   string
 	Endpoint string
