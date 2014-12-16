@@ -80,6 +80,8 @@ func (c *Client) request(method, path string, v interface{}, filters Filters) ([
 
 			if data, err := ioutil.ReadAll(res.Body); err != nil {
 				return nil, err
+			} else if res.StatusCode/100 != 2 && res.StatusCode != http.StatusNotModified {
+				return nil, fmt.Errorf("%d: %s", res.StatusCode, data)
 			} else {
 				return data, nil
 			}
