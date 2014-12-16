@@ -8,11 +8,25 @@ import (
 	"strings"
 )
 
+func (c *Client) sanitisePath(path string) (string, error) {
 	if !strings.HasPrefix(path, "/") {
 		path = "/" + path
 	}
 
+	// Strip host information so we request /foo/bar rather than
+	// http://example.com/foo/bar. This affects the GET header and failing to do
+	// this can cause the server to erroneously 404.
+	//
+	// We generate a URL combining the endpoint and the provided path so we pick
+	// up all of the path to request, e.g. endpoint
+	// 'http://example.com/foo/bar/baz', path '/gwargh/fwargh/mwargh' should
+	// produce a sanitised path of '/foo/bar/baz/gwargh/fwargh/mwargh'.
+	if u, err := url.Parse(c.Endpoint + path); err != nil {
+		return "", err
+	} else {
+		return u.Path, nil
 	}
+}
 
 	query.Add("apikey", a.APIKey)
 	//query.Add("$expand", "device")
