@@ -13,6 +13,38 @@ import (
 	"github.com/bitly/go-simplejson"
 )
 
+// oDataEncodeVals URL Encode values and separate with commas.
+func oDataEncodeVals(strs []string) string {
+	encoded := make([]string, len(strs))
+
+	for i, str := range strs {
+		encoded[i] = url.QueryEscape(str)
+	}
+
+	return strings.Join(encoded, ",")
+}
+
+// encodeQuery encodes query values, working around a net/url issue whereby keys
+// get encoded as well as values. We only want values encoded, otherwise OData
+// dies.
+func encodeQuery(query map[string][]string) string {
+	if len(query) == 0 {
+		return ""
+	}
+
+	var tuples []string
+	for key, vals := range query {
+		if len(vals) == 0 {
+			continue
+		}
+
+		tuple := key + "=" + oDataEncodeVals(vals)
+		tuples = append(tuples, tuple)
+	}
+
+	return "?" + strings.Join(tuples, "&")
+}
+
 // ptrType extracts the pointer type of a provided interface, e.g. *Foo -> Foo.
 func ptrType(v interface{}) (reflect.Type, error) {
 	if ty := reflect.TypeOf(v); ty.Kind() != reflect.Ptr {
