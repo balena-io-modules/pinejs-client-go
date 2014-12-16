@@ -3,6 +3,19 @@ import (
 	"encoding/json"
 	"github.com/bitly/go-simplejson"
 )
+
+func toJsonReader(v interface{}) (io.Reader, error) {
+	if v == nil {
+		return nil, nil
+	}
+
+	if buf, err := json.Marshal(v); err != nil {
+		return nil, err
+	} else {
+		return bytes.NewReader(buf), nil
+	}
+}
+
 // Some functionality that is strangely lacking from simplejson...
 
 type jsonNodeType int
