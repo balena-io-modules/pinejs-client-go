@@ -1,7 +1,7 @@
 package resin
 
 type Application struct {
-	Id            int      `json:"id"`
+	Id            int      `json:"id,omitempty"`
 	AppName       string   `json:"app_name"`
 	GitRepository string   `json:"git_repository"`
 	Commit        string   `json:"commit"`
@@ -9,7 +9,7 @@ type Application struct {
 }
 
 type Device struct {
-	Id                   int          `json:"id"`
+	Id                   int          `json:"id,omitempty"`
 	Name                 string       `json:"name"`
 	DeviceType           string       `json:"device_type"`
 	UUID                 string       `json:"uuid"`
@@ -28,10 +28,11 @@ type Device struct {
 }
 
 type EnvironmentVariable struct {
-	Id    int    `json:"id" pinejs:"environment_variable"`
+	Id    int    `json:"id,omitempty" pinejs:"environment_variable"`
 	Name  string `json:"name"`
 	Value string `json:"value"`
 }
 
 type User struct {
+	Id int `json:"id,omitempty"`
 }
