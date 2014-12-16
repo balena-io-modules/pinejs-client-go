@@ -58,6 +58,26 @@ func NewClient(endpoint, apiKey string) *Client {
 	return &Client{apiKey, endpoint, nil}
 }
 
+// Get returns data from the pine.js client for a particular resource and places
+// it into the provided v interface. Optionally, filters can be set on the data.
+//
+// Get expects v to be a pointer to a struct, and there to be an Id field set to
+// a valid id (i.e. non-zero.)
+//
+// Get determines the name of resource to retrieve from a pinejs tag placed on
+// any field in the struct, or if this is not present, the struct name in lower
+// case.
+//
+// Data is decoded using the standard library's encoding/json package, so ensure
+// to export all fields you wish to decode to and set json tags as appropriate.
+//
+// Additionally, if you plan to later write data, you ought to set the omitempty
+// tag on id fields. See resin/resin.go for a good example of how to accomplish
+// all this.
+//
+// Currently, if one of the fields you import is an unexpanded nested struct,
+// the library will simply set the Id field and expect you to manually request
+// the rest of the struct's data.
 func (c *Client) Get(v interface{}, filters ...ODataFilter) error {
 	if err := assertPointerToStruct(v); err != nil {
 		return err
@@ -74,6 +94,12 @@ func (c *Client) Get(v interface{}, filters ...ODataFilter) error {
 	}
 }
 
+// List returns all elements of a specific resource according to the filters
+// specified, if any.
+//
+// List expects v to be a pointer to a slice of structs.
+//
+// See Get for further details.
 func (c *Client) List(v interface{}, filters ...ODataFilter) error {
 	if err := assertPointerToSliceStructs(v); err != nil {
 		return err
@@ -86,6 +112,12 @@ func (c *Client) List(v interface{}, filters ...ODataFilter) error {
 	}
 }
 
+// Create generates a new entity of a specific resource, and populates fields as
+// they are in the database, including Id.
+//
+// Create expects v to be a pointer to a struct.
+//
+// See Get for further details.
 func (c *Client) Create(v interface{}, filters ...ODataFilter) error {
 	if err := assertPointerToStruct(v); err != nil {
 		return err
@@ -102,6 +134,14 @@ func (c *Client) Create(v interface{}, filters ...ODataFilter) error {
 	}
 }
 
+// Update updates a specific resource's entity given a specific id. All fields
+// are overwritten. If an entity with the specific id doesn't already exist, it
+// is created.
+//
+// Update expects v to be a pointer to a struct, and there to be an Id field set to
+// a valid id (i.e. non-zero.)
+//
+// See Get for further details.
 func (c *Client) Update(v interface{}) error {
 	if err := assertPointerToStruct(v); err != nil {
 		return err
@@ -118,6 +158,13 @@ func (c *Client) Update(v interface{}) error {
 	return nil
 }
 
+// Patch updates a specific resource's entity given a specific id, updating only
+// the specified fields.
+//
+// Patch expects v to be a pointer to a struct, and there to be an Id field set to
+// a valid id (i.e. non-zero.)
+//
+// See Get for further details.
 func (c *Client) Patch(v interface{}) error {
 	if err := assertPointerToStruct(v); err != nil {
 		return err
@@ -134,6 +181,12 @@ func (c *Client) Patch(v interface{}) error {
 	return nil
 }
 
+// Deletes deletes a specific resource's entity given a specific id.
+//
+// Delete expects v to be a pointer to a struct, and there to be an Id field set to
+// a valid id (i.e. non-zero.)
+//
+// See Get for further details.
 func (c *Client) Delete(v interface{}) error {
 	if err := assertPointerToStruct(v); err != nil {
 		return err
