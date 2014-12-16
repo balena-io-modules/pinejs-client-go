@@ -1,30 +1,17 @@
 package pinejs
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
-
-	"github.com/fatih/structs"
 )
 
-type envelope struct {
-	Data []interface{} `json:"d"`
-}
-
-func (a *Client) request(method, path string, query *url.Values, body *url.Values, v interface{}) (err error) {
 	if !strings.HasPrefix(path, "/") {
 		path = "/" + path
 	}
 
-	path = a.Endpoint + path
-
-	if query == nil {
-		query = &url.Values{}
 	}
 
 	query.Add("apikey", a.APIKey)
