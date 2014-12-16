@@ -45,13 +45,17 @@ func ShowDebugOutput() {
 
 	logDebug = log.New(os.Stderr, "", logFlagsDebug)
 }
+
+// Client represents an HTTP client to a pine.js server.
 type Client struct {
-	APIKey   string
-	Endpoint string
+	APIKey, Endpoint string
+	reader           io.Reader
 }
 
-func (a *Client) Get(res interface{}) error {
-	path := resourceName(res) + "(" + resourceId(res) + ")"
+// NewClient returns a client initialised to the provided endpoint and API key.
+func NewClient(endpoint, apiKey string) *Client {
+	return &Client{apiKey, endpoint, nil}
+}
 
 	return a.request("GET", path, nil, nil, &[]interface{}{res})
 }
