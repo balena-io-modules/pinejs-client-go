@@ -12,9 +12,6 @@ import (
 	"github.com/fatih/structs"
 )
 
-// VERSION is the binding version
-const VERSION = "0.0.1"
-
 type envelope struct {
 	Data []interface{} `json:"d"`
 }

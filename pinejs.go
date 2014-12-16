@@ -4,6 +4,11 @@ import (
 	"errors"
 )
 
+// The current implementation version.
+func Version() string {
+	return "0.0.1"
+}
+
 type Client struct {
 	APIKey   string
 	Endpoint string
