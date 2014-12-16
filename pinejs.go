@@ -4,6 +4,7 @@ package pinejs
 
 import (
 	"errors"
+	"io"
 	"log"
 	"os"
 )
@@ -57,7 +58,6 @@ func NewClient(endpoint, apiKey string) *Client {
 	return &Client{apiKey, endpoint, nil}
 }
 
-	return a.request("GET", path, nil, nil, &[]interface{}{res})
 func (c *Client) Get(v interface{}, filters ...ODataFilter) error {
 	if err := assertPointerToStruct(v); err != nil {
 		return err
@@ -133,9 +133,6 @@ func (c *Client) Patch(v interface{}) error {
 
 	return nil
 }
-func (a *Client) Delete(res interface{}) error {
-	// Should DELETE
-	return errors.New("Not implemented")
 
 func (c *Client) Delete(v interface{}) error {
 	if err := assertPointerToStruct(v); err != nil {
