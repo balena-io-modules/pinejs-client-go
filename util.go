@@ -1,6 +1,7 @@
 package pinejs
 import (
 	"encoding/json"
+	"github.com/bitly/go-simplejson"
 )
 // Some functionality that is strangely lacking from simplejson...
 
