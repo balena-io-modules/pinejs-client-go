@@ -28,10 +28,16 @@ func (c *Client) sanitisePath(path string) (string, error) {
 	}
 }
 
-	query.Add("apikey", a.APIKey)
-	//query.Add("$expand", "device")
+// Mutate input request and set path as requested, accounting for issues arising
+// with server redirects corrupting queries.
+func preprocessRequest(req *http.Request, path string, query map[string][]string) {
+	// Identify ourselves.
+	req.Header.Add("User-Agent", "PineJS/v1 GoBindings/"+Version())
 
-	// path += "?" + query.Encode()
+	// Need to use Opaque to prevent redirects causing invalid encoding of the
+	// query string.
+	req.URL.Opaque = path + encodeQuery(query)
+}
 
 	req, _ := http.NewRequest(method, a.Endpoint, nil)
 	req.URL.Opaque = path + "?apikey=" + a.APIKey + "&$expand=device"
