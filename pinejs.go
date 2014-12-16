@@ -2,6 +2,8 @@ package pinejs
 
 import (
 	"errors"
+	"log"
+	"os"
 )
 
 // The current implementation version.
@@ -9,6 +11,16 @@ func Version() string {
 	return "0.0.1"
 }
 
+const (
+	logFlags      = log.Ldate | log.Ltime
+	logFlagsDebug = logFlags | log.Lshortfile
+)
+
+var (
+	logAlert = log.New(os.Stderr, "", logFlags)
+	logDebug *log.Logger // Defaults to /dev/null in init()
+	nullFile *os.File
+)
 type Client struct {
 	APIKey   string
 	Endpoint string
