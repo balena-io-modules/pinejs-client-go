@@ -13,6 +13,37 @@ import (
 	"github.com/bitly/go-simplejson"
 )
 
+// ptrType extracts the pointer type of a provided interface, e.g. *Foo -> Foo.
+func ptrType(v interface{}) (reflect.Type, error) {
+	if ty := reflect.TypeOf(v); ty.Kind() != reflect.Ptr {
+		return nil, errors.New("not a pointer")
+	} else {
+		return ty.Elem(), nil
+	}
+}
+
+func assertPointerToStruct(v interface{}) error {
+	if el, err := ptrType(v); err != nil {
+		return err
+	} else if el.Kind() != reflect.Struct {
+		return errors.New("not a pointer to a struct")
+	}
+
+	return nil
+}
+
+func assertPointerToSliceStructs(v interface{}) error {
+	if el, err := ptrType(v); err != nil {
+		return err
+	} else if el.Kind() != reflect.Slice {
+		return errors.New("not a pointer to a slice")
+	} else if el.Elem().Kind() != reflect.Struct {
+		return errors.New("not a pointer to a slice of structs")
+	}
+
+	return nil
+}
+
 func toJsonReader(v interface{}) (io.Reader, error) {
 	if v == nil {
 		return nil, nil
