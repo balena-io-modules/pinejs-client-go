@@ -1,7 +1,23 @@
 package pinejs
+
 import (
+	"bytes"
+	"encoding/json"
+	"errors"
+	"reflect"
+
 	"github.com/bitly/go-simplejson"
 )
+func unmarshal(v interface{}, j *simplejson.Json) error {
+	if b, err := j.MarshalJSON(); err != nil {
+		return err
+	} else {
+		r := bytes.NewReader(b)
+		d := json.NewDecoder(r)
+		return d.Decode(v)
+	}
+}
+
 // Predicates
 
 // These are used to transform input before attempting to unmarshal and vary

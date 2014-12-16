@@ -51,13 +51,4 @@ func (a *Client) request(method, path string, query *url.Values, body *url.Value
 	if err != nil {
 		return
 	}
-
-	var e envelope
-	json.Unmarshal(resBody, &e)
-
-	fmt.Println(e.Data)
-	normalise(e.Data, structs.New(resourceFromSlice(v)))
-
-	// json.Unmarshal(json.Marshal(data), v)
-	return
 }
