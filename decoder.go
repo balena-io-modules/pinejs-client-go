@@ -58,6 +58,36 @@ func unmarshal(v interface{}, j *simplejson.Json) error {
 	}
 }
 
+func decode(v interface{}, data []byte, predicate transformJSONFunc) error {
+	if v == nil {
+		// reflect.Typeof(nil) throws...
+		return errors.New("nil interface")
+	}
+
+	ty := reflect.TypeOf(v)
+
+	if ty.Kind() != reflect.Ptr {
+		return errors.New("non-pointer target type")
+	}
+
+	if j, err := simplejson.NewJson(data); err != nil {
+		return err
+	} else {
+		// Transform input JSON according to predicate.
+		j = predicate(j)
+
+		if j == nil {
+			// Nothing to do.
+			return nil
+		}
+
+		// Walk JSON looking for deferred structs and fixing them up.
+		walkJson(j)
+
+		return unmarshal(v, j)
+	}
+}
+
 // Predicates
 
 // These are used to transform input before attempting to unmarshal and vary
