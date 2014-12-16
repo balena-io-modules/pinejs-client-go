@@ -39,23 +39,50 @@ func preprocessRequest(req *http.Request, path string, query map[string][]string
 	req.URL.Opaque = path + encodeQuery(query)
 }
 
-	req, _ := http.NewRequest(method, a.Endpoint, nil)
-	req.URL.Opaque = path + "?apikey=" + a.APIKey + "&$expand=device"
+// request performs an HTTP request using the specific method, path, input
+// interface and filters, and returns the response.
+//
+// If the method writes data the function marshals the input data into JSON and
+// sends it as MIME type application/json.
+//
+// Any specified filters are encoded as a query string with special handling to
+// prevent encoding of keys (something Go's net/url library likes to do.)
+func (c *Client) request(method, path string, v interface{}, filters Filters) ([]byte, error) {
+	if body, err := toJsonReader(v); err != nil {
+		return nil, err
+	} else if path, err := c.sanitisePath(path); err != nil {
+		return nil, err
+	} else if req, err := http.NewRequest(method, c.Endpoint, body); err != nil {
+		return nil, err
+	} else {
+		if body != nil {
+			req.Header.Set("Content-Type", "application/json")
+		}
 
-	req.Header.Add("User-Agent", "PineJS/v1 GoBindings/"+VERSION)
+		query := make(map[string][]string)
+		if filters != nil {
+			for key, val := range filters.toMap() {
+				query[key] = val
+			}
+		}
 
-	log.Printf("Requesting %v %q\n", method, path)
+		if c.APIKey != "" {
+			query["apikey"] = []string{c.APIKey}
+		}
 
-	res, err := http.DefaultClient.Do(req)
+		preprocessRequest(req, path, query)
 
-	if err != nil {
-		log.Printf("Request failed: %v\n", err)
-		return err
-	}
-	defer res.Body.Close()
+		logDebug.Printf("Requesting %s %s\n", method, req.URL)
+		if res, err := http.DefaultClient.Do(req); err != nil {
+			return nil, err
+		} else {
+			defer res.Body.Close()
 
-	resBody, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return
+			if data, err := ioutil.ReadAll(res.Body); err != nil {
+				return nil, err
+			} else {
+				return data, nil
+			}
+		}
 	}
 }
