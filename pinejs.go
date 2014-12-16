@@ -58,29 +58,97 @@ func NewClient(endpoint, apiKey string) *Client {
 }
 
 	return a.request("GET", path, nil, nil, &[]interface{}{res})
+func (c *Client) Get(v interface{}, filters ...ODataFilter) error {
+	if err := assertPointerToStruct(v); err != nil {
+		return err
+	}
+
+	if resourceId(v) == 0 {
+		return errors.New("id not set")
+	}
+
+	if data, err := c.request("GET", getSinglePath(v), nil, Filters(filters)); err != nil {
+		return err
+	} else {
+		return decode(v, data, first)
+	}
 }
 
-func (a *Client) List(resSlice interface{}) error {
-	path := resourceName(resourceFromSlice(resSlice))
+func (c *Client) List(v interface{}, filters ...ODataFilter) error {
+	if err := assertPointerToSliceStructs(v); err != nil {
+		return err
+	}
 
-	return a.request("GET", path, nil, nil, resSlice)
+	if data, err := c.request("GET", resourceName(v), nil, Filters(filters)); err != nil {
+		return err
+	} else {
+		return decode(v, data, theD)
+	}
 }
 
-func (a *Client) Create(res interface{}) error {
-	// Should POST
-	return errors.New("Not implemented")
+func (c *Client) Create(v interface{}, filters ...ODataFilter) error {
+	if err := assertPointerToStruct(v); err != nil {
+		return err
+	}
+
+	if resourceId(v) > 0 {
+		return errors.New("attempting to create with id set")
+	}
+
+	if data, err := c.request("POST", resourceName(v), v, Filters(filters)); err != nil {
+		return err
+	} else {
+		return decode(v, data, self)
+	}
 }
 
-func (a *Client) Update(res interface{}) error {
-	// Should PUT
-	return errors.New("Not implemented")
+func (c *Client) Update(v interface{}) error {
+	if err := assertPointerToStruct(v); err != nil {
+		return err
+	}
+
+	if resourceId(v) == 0 {
+		return errors.New("id not set")
+	}
+
+	if _, err := c.request("PUT", getSinglePath(v), v, nil); err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func (a *Client) Patch(res interface{}) error {
-	// Should PATCH
-	return errors.New("Not implemented")
+func (c *Client) Patch(v interface{}) error {
+	if err := assertPointerToStruct(v); err != nil {
+		return err
+	}
+
+	if resourceId(v) == 0 {
+		return errors.New("id not set")
+	}
+
+	if _, err := c.request("PATCH", getSinglePath(v), v, nil); err != nil {
+		return err
+	}
+
+	return nil
 }
 func (a *Client) Delete(res interface{}) error {
 	// Should DELETE
 	return errors.New("Not implemented")
+
+func (c *Client) Delete(v interface{}) error {
+	if err := assertPointerToStruct(v); err != nil {
+		return err
+	}
+
+	if resourceId(v) == 0 {
+		return errors.New("id not set")
+	}
+
+	if _, err := c.request("DELETE", getSinglePath(v), v, nil); err != nil {
+		return err
+	}
+
+	return nil
 }
