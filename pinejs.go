@@ -1,3 +1,5 @@
+// pinejs implements an interface to pine.js
+// See https://bitbucket.org/rulemotion/pinejs
 package pinejs
 
 import (
