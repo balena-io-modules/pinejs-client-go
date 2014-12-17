@@ -11,7 +11,7 @@ import (
 
 // The current implementation version.
 func Version() string {
-	return "0.0.2"
+	return "0.0.3"
 }
 
 const (
@@ -84,9 +84,9 @@ func (c *Client) Get(v interface{}, queryOptions ...QueryOption) error {
 		return err
 	}
 
-	if id, err := resourceId(v); err != nil {
+	if omitted, err := isIdOmitted(v); err != nil {
 		return err
-	} else if id == 0 {
+	} else if omitted {
 		return errors.New("id not set")
 	}
 
@@ -156,9 +156,9 @@ func (c *Client) Update(v interface{}) error {
 		return err
 	}
 
-	if id, err := resourceId(v); err != nil {
+	if omitted, err := isIdOmitted(v); err != nil {
 		return err
-	} else if id == 0 {
+	} else if omitted {
 		return errors.New("id not set")
 	}
 
@@ -183,9 +183,9 @@ func (c *Client) Patch(v interface{}) error {
 		return err
 	}
 
-	if id, err := resourceId(v); err != nil {
+	if omitted, err := isIdOmitted(v); err != nil {
 		return err
-	} else if id == 0 {
+	} else if omitted {
 		return errors.New("id not set")
 	}
 
@@ -209,9 +209,9 @@ func (c *Client) Delete(v interface{}) error {
 		return err
 	}
 
-	if id, err := resourceId(v); err != nil {
+	if omitted, err := isIdOmitted(v); err != nil {
 		return err
-	} else if id == 0 {
+	} else if omitted {
 		return errors.New("id not set")
 	}
 

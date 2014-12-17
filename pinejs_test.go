@@ -1,6 +1,8 @@
 package pinejs
 
 import (
+	"encoding/json"
+	"strings"
 	"testing"
 
 	"bitbucket.org/rulemotion/pinejs-client-go/resin"
@@ -103,6 +105,70 @@ func TestList(t *testing.T) {
 		var apps []resin.Application
 		if err := api.List(&apps, NewQueryOptions(Expand, "device")...); err != nil {
 			t.Fatal(err)
+		}
+	}
+}
+
+type IdError1 struct {
+}
+
+type IdError2 struct {
+	Id string
+}
+
+type IdOmitted struct {
+	Id int `json:"id,omitempty"`
+}
+
+type IdNotOmitted struct {
+	Id int `json:"id"`
+}
+
+var (
+	omittedErrors = []interface{}{
+		IdError1{},
+		&IdError1{},
+		IdError2{},
+		&IdError2{},
+	}
+	areOmitted = []interface{}{
+		IdOmitted{},
+		&IdOmitted{},
+	}
+	notOmitted = []interface{}{
+		IdNotOmitted{},
+		&IdNotOmitted{},
+	}
+)
+
+func TestIdOmitted(t *testing.T) {
+	for _, val := range omittedErrors {
+		if _, err := isIdOmitted(val); err == nil {
+			t.Errorf("%#v didn't raise idOmitted Error", val)
+		}
+	}
+
+	for _, val := range areOmitted {
+		if omitted, err := isIdOmitted(val); err != nil {
+			t.Errorf("%#v raised unexpected error %s", val, err)
+		} else if !omitted {
+			t.Errorf("%#v unexpectedly marked not omitted", val)
+		} else if by, err := json.Marshal(val); err != nil {
+			t.Errorf("%s", err)
+		} else if strings.Contains(string(by), "id") {
+			t.Errorf("%#v marked omitted but present in encoding/json output", val)
+		}
+	}
+
+	for _, val := range notOmitted {
+		if omitted, err := isIdOmitted(val); err != nil {
+			t.Errorf("%#v raised unexpected error %s", val, err)
+		} else if omitted {
+			t.Errorf("%#v unexpectedly marked omitted", val)
+		} else if by, err := json.Marshal(val); err != nil {
+			t.Errorf("%s", err)
+		} else if !strings.Contains(string(by), "id") {
+			t.Errorf("%#v marked not omitted but not present in encoding/json output", val)
 		}
 	}
 }

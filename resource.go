@@ -46,25 +46,28 @@ func resourceName(v interface{}) (string, error) {
 		ty.Kind())
 }
 
+func getResourceField(v interface{}) (f *structs.Field, err error) {
+	var ok bool
+
+	if !structs.IsStruct(v) {
+		err = errors.New("not a struct")
+	} else if f, ok = structs.New(v).FieldOk("Id"); !ok {
+		err = errors.New("no 'Id' field")
+	} else if _, ok = f.Value().(int); !ok {
+		err = errors.New("Id field is not an int")
+	}
+
+	return
+}
+
 // Retrieve Id field from interface.
-func resourceId(v interface{}) (ret int64, err error) {
-	vl := reflect.ValueOf(v)
+func resourceId(v interface{}) (ret int, err error) {
+	var f *structs.Field
 
-	for vl.Kind() == reflect.Ptr {
-		vl = vl.Elem()
-	}
-
-	if vl.Kind() != reflect.Struct {
-		return 0, fmt.Errorf("tried to retrieve resource id from non-struct %s",
-			vl.Kind())
-	}
-
-	if field := vl.FieldByName("Id"); !field.IsValid() {
-		err = errors.New("Id field not present")
-	} else if !field.Type().ConvertibleTo(reflect.TypeOf(ret)) {
-		err = fmt.Errorf("Id not convertible to %s", reflect.TypeOf(ret))
+	if f, err = getResourceField(v); err != nil {
+		return 0, err
 	} else {
-		ret = field.Int()
+		ret = f.Value().(int)
 	}
 
 	return
