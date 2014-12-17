@@ -65,26 +65,26 @@ func ptrType(v interface{}) (reflect.Type, error) {
 	}
 }
 
-func assertPointerToStruct(v interface{}) error {
+func isPointerToStruct(v interface{}) (bool, error) {
 	if el, err := ptrType(v); err != nil {
-		return err
+		return false, err
 	} else if el.Kind() != reflect.Struct {
-		return errors.New("not a pointer to a struct")
+		return false, errors.New("not a pointer to a struct")
 	}
 
-	return nil
+	return true, nil
 }
 
-func assertPointerToSliceStructs(v interface{}) error {
+func isPointerToSliceStructs(v interface{}) (bool, error) {
 	if el, err := ptrType(v); err != nil {
-		return err
+		return false, err
 	} else if el.Kind() != reflect.Slice {
-		return errors.New("not a pointer to a slice")
+		return false, errors.New("not a pointer to a slice")
 	} else if el.Elem().Kind() != reflect.Struct {
-		return errors.New("not a pointer to a slice of structs")
+		return false, errors.New("not a pointer to a slice of structs")
 	}
 
-	return nil
+	return true, nil
 }
 
 func toJsonReader(v interface{}) (io.Reader, error) {

@@ -79,7 +79,7 @@ func NewClient(endpoint, apiKey string) *Client {
 // the library will simply set the Id field and expect you to manually request
 // the rest of the struct's data.
 func (c *Client) Get(v interface{}, filters ...ODataFilter) error {
-	if err := assertPointerToStruct(v); err != nil {
+	if _, err := isPointerToStruct(v); err != nil {
 		return err
 	}
 
@@ -105,7 +105,7 @@ func (c *Client) Get(v interface{}, filters ...ODataFilter) error {
 //
 // See Get for further details.
 func (c *Client) List(v interface{}, filters ...ODataFilter) error {
-	if err := assertPointerToSliceStructs(v); err != nil {
+	if _, err := isPointerToSliceStructs(v); err != nil {
 		return err
 	} else if name, err := resourceName(v); err != nil {
 		return err
@@ -123,7 +123,7 @@ func (c *Client) List(v interface{}, filters ...ODataFilter) error {
 //
 // See Get for further details.
 func (c *Client) Create(v interface{}, filters ...ODataFilter) error {
-	if err := assertPointerToStruct(v); err != nil {
+	if _, err := isPointerToStruct(v); err != nil {
 		return err
 	}
 
@@ -151,7 +151,7 @@ func (c *Client) Create(v interface{}, filters ...ODataFilter) error {
 //
 // See Get for further details.
 func (c *Client) Update(v interface{}) error {
-	if err := assertPointerToStruct(v); err != nil {
+	if _, err := isPointerToStruct(v); err != nil {
 		return err
 	}
 
@@ -178,7 +178,7 @@ func (c *Client) Update(v interface{}) error {
 //
 // See Get for further details.
 func (c *Client) Patch(v interface{}) error {
-	if err := assertPointerToStruct(v); err != nil {
+	if _, err := isPointerToStruct(v); err != nil {
 		return err
 	}
 
@@ -204,7 +204,7 @@ func (c *Client) Patch(v interface{}) error {
 //
 // See Get for further details.
 func (c *Client) Delete(v interface{}) error {
-	if err := assertPointerToStruct(v); err != nil {
+	if _, err := isPointerToStruct(v); err != nil {
 		return err
 	}
 
