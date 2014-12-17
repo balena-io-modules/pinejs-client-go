@@ -59,7 +59,8 @@ func NewClient(endpoint, apiKey string) *Client {
 }
 
 // Get returns data from the pine.js client for a particular resource and places
-// it into the provided v interface. Optionally, filters can be set on the data.
+// it into the provided v interface. Optionally, query options can be set on the
+// data.
 //
 // Get expects v to be a pointer to a struct, and there to be an Id field set to
 // a valid id (i.e. non-zero.)
@@ -78,7 +79,7 @@ func NewClient(endpoint, apiKey string) *Client {
 // Currently, if one of the fields you import is an unexpanded nested struct,
 // the library will simply set the Id field and expect you to manually request
 // the rest of the struct's data.
-func (c *Client) Get(v interface{}, filters ...ODataFilter) error {
+func (c *Client) Get(v interface{}, queryOptions ...QueryOption) error {
 	if _, err := isPointerToStruct(v); err != nil {
 		return err
 	}
@@ -91,25 +92,25 @@ func (c *Client) Get(v interface{}, filters ...ODataFilter) error {
 
 	if path, err := getSinglePath(v); err != nil {
 		return err
-	} else if data, err := c.request("GET", path, nil, Filters(filters)); err != nil {
+	} else if data, err := c.request("GET", path, nil, QueryOptions(queryOptions)); err != nil {
 		return err
 	} else {
 		return decode(v, data, first)
 	}
 }
 
-// List returns all elements of a specific resource according to the filters
-// specified, if any.
+// List returns all elements of a specific resource according to the query
+// options specified, if any.
 //
 // List expects v to be a pointer to a slice of structs.
 //
 // See Get for further details.
-func (c *Client) List(v interface{}, filters ...ODataFilter) error {
+func (c *Client) List(v interface{}, queryOptions ...QueryOption) error {
 	if _, err := isPointerToSliceStructs(v); err != nil {
 		return err
 	} else if name, err := resourceName(v); err != nil {
 		return err
-	} else if data, err := c.request("GET", name, nil, Filters(filters)); err != nil {
+	} else if data, err := c.request("GET", name, nil, QueryOptions(queryOptions)); err != nil {
 		return err
 	} else {
 		return decode(v, data, theD)
@@ -122,7 +123,7 @@ func (c *Client) List(v interface{}, filters ...ODataFilter) error {
 // Create expects v to be a pointer to a struct.
 //
 // See Get for further details.
-func (c *Client) Create(v interface{}, filters ...ODataFilter) error {
+func (c *Client) Create(v interface{}, queryOptions ...QueryOption) error {
 	if _, err := isPointerToStruct(v); err != nil {
 		return err
 	}
@@ -135,7 +136,7 @@ func (c *Client) Create(v interface{}, filters ...ODataFilter) error {
 
 	if name, err := resourceName(v); err != nil {
 		return err
-	} else if data, err := c.request("POST", name, v, Filters(filters)); err != nil {
+	} else if data, err := c.request("POST", name, v, QueryOptions(queryOptions)); err != nil {
 		return err
 	} else {
 		return decode(v, data, self)

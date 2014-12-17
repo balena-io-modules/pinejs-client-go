@@ -40,14 +40,15 @@ func preprocessRequest(req *http.Request, path string, query map[string][]string
 }
 
 // request performs an HTTP request using the specific method, path, input
-// interface and filters, and returns the response.
+// interface and query options, and returns the response.
 //
 // If the method writes data the function marshals the input data into JSON and
 // sends it as MIME type application/json.
 //
-// Any specified filters are encoded as a query string with special handling to
-// prevent encoding of keys (something Go's net/url library likes to do.)
-func (c *Client) request(method, path string, v interface{}, filters Filters) ([]byte, error) {
+// Any specified query optinos are encoded as a query string with special
+// handling to prevent encoding of keys (something Go's net/url library likes to
+// do.)
+func (c *Client) request(method, path string, v interface{}, queryOptions QueryOptions) ([]byte, error) {
 	if body, err := toJsonReader(v); err != nil {
 		return nil, err
 	} else if path, err := c.sanitisePath(path); err != nil {
@@ -60,8 +61,8 @@ func (c *Client) request(method, path string, v interface{}, filters Filters) ([
 		}
 
 		query := make(map[string][]string)
-		if filters != nil {
-			for key, val := range filters.toMap() {
+		if queryOptions != nil {
+			for key, val := range queryOptions.toMap() {
 				query[key] = val
 			}
 		}

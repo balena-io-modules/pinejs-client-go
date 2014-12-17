@@ -15,7 +15,7 @@ func TestGet(t *testing.T) {
 		t.Fatal(err)
 	} else {
 		app := resin.Application{Id: 338}
-		if err := api.Get(&app, Filterfy(Expand, "device")...); err != nil {
+		if err := api.Get(&app, NewQueryOptions(Expand, "device")...); err != nil {
 			t.Fatal(err)
 		}
 
@@ -101,7 +101,7 @@ func TestList(t *testing.T) {
 		t.Fatal(err)
 	} else {
 		var apps []resin.Application
-		if err := api.List(&apps, Filterfy(Expand, "device")...); err != nil {
+		if err := api.List(&apps, NewQueryOptions(Expand, "device")...); err != nil {
 			t.Fatal(err)
 		}
 	}
