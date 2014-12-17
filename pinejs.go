@@ -11,7 +11,7 @@ import (
 
 // The current implementation version.
 func Version() string {
-	return "0.0.1"
+	return "0.0.2"
 }
 
 const (
@@ -83,11 +83,15 @@ func (c *Client) Get(v interface{}, filters ...ODataFilter) error {
 		return err
 	}
 
-	if resourceId(v) == 0 {
+	if id, err := resourceId(v); err != nil {
+		return err
+	} else if id == 0 {
 		return errors.New("id not set")
 	}
 
-	if data, err := c.request("GET", getSinglePath(v), nil, Filters(filters)); err != nil {
+	if path, err := getSinglePath(v); err != nil {
+		return err
+	} else if data, err := c.request("GET", path, nil, Filters(filters)); err != nil {
 		return err
 	} else {
 		return decode(v, data, first)
@@ -103,9 +107,9 @@ func (c *Client) Get(v interface{}, filters ...ODataFilter) error {
 func (c *Client) List(v interface{}, filters ...ODataFilter) error {
 	if err := assertPointerToSliceStructs(v); err != nil {
 		return err
-	}
-
-	if data, err := c.request("GET", resourceName(v), nil, Filters(filters)); err != nil {
+	} else if name, err := resourceName(v); err != nil {
+		return err
+	} else if data, err := c.request("GET", name, nil, Filters(filters)); err != nil {
 		return err
 	} else {
 		return decode(v, data, theD)
@@ -123,11 +127,15 @@ func (c *Client) Create(v interface{}, filters ...ODataFilter) error {
 		return err
 	}
 
-	if resourceId(v) > 0 {
+	if id, err := resourceId(v); err != nil {
+		return err
+	} else if id > 0 {
 		return errors.New("attempting to create with id set")
 	}
 
-	if data, err := c.request("POST", resourceName(v), v, Filters(filters)); err != nil {
+	if name, err := resourceName(v); err != nil {
+		return err
+	} else if data, err := c.request("POST", name, v, Filters(filters)); err != nil {
 		return err
 	} else {
 		return decode(v, data, self)
@@ -147,11 +155,15 @@ func (c *Client) Update(v interface{}) error {
 		return err
 	}
 
-	if resourceId(v) == 0 {
+	if id, err := resourceId(v); err != nil {
+		return err
+	} else if id == 0 {
 		return errors.New("id not set")
 	}
 
-	if _, err := c.request("PUT", getSinglePath(v), v, nil); err != nil {
+	if path, err := getSinglePath(v); err != nil {
+		return err
+	} else if _, err := c.request("PUT", path, v, nil); err != nil {
 		return err
 	}
 
@@ -170,11 +182,15 @@ func (c *Client) Patch(v interface{}) error {
 		return err
 	}
 
-	if resourceId(v) == 0 {
+	if id, err := resourceId(v); err != nil {
+		return err
+	} else if id == 0 {
 		return errors.New("id not set")
 	}
 
-	if _, err := c.request("PATCH", getSinglePath(v), v, nil); err != nil {
+	if path, err := getSinglePath(v); err != nil {
+		return err
+	} else if _, err := c.request("PATCH", path, v, nil); err != nil {
 		return err
 	}
 
@@ -192,11 +208,15 @@ func (c *Client) Delete(v interface{}) error {
 		return err
 	}
 
-	if resourceId(v) == 0 {
+	if id, err := resourceId(v); err != nil {
+		return err
+	} else if id == 0 {
 		return errors.New("id not set")
 	}
 
-	if _, err := c.request("DELETE", getSinglePath(v), v, nil); err != nil {
+	if path, err := getSinglePath(v); err != nil {
+		return err
+	} else if _, err := c.request("DELETE", path, v, nil); err != nil {
 		return err
 	}
 

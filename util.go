@@ -46,11 +46,14 @@ func encodeQuery(query map[string][]string) string {
 }
 
 // getSinglePath generates a path for accessing a specific resource and ID.
-func getSinglePath(v interface{}) string {
-	name := resourceName(v)
-	id := resourceId(v)
-
-	return fmt.Sprintf("%s(%d)", name, id)
+func getSinglePath(v interface{}) (string, error) {
+	if name, err := resourceName(v); err != nil {
+		return "", err
+	} else if id, err := resourceId(v); err != nil {
+		return "", err
+	} else {
+		return fmt.Sprintf("%s(%d)", name, id), nil
+	}
 }
 
 // ptrType extracts the pointer type of a provided interface, e.g. *Foo -> Foo.
