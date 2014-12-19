@@ -11,7 +11,7 @@ import (
 
 // The current implementation version.
 func Version() string {
-	return "0.0.3"
+	return "0.0.4"
 }
 
 const (
@@ -115,6 +115,20 @@ func (c *Client) List(v interface{}, queryOptions ...QueryOption) error {
 	} else {
 		return decode(v, data, theD)
 	}
+}
+
+// Read choose to Get or List depending on the type of v - Get if v is a pointer
+// to a struct, List if v is a pointer to a slice.
+//
+// See Get and List for further details.
+func (c *Client) Read(v interface{}, queryOptions ...QueryOption) error {
+	if isSlice, _ := isPointerToSliceStructs(v); isSlice {
+		return c.List(v, queryOptions...)
+	} else if isStruct, _ := isPointerToStruct(v); isStruct {
+		return c.Get(v, queryOptions...)
+	}
+
+	return errors.New("not a pointer to a struct or slice")
 }
 
 // Create generates a new entity of a specific resource, and populates fields as
