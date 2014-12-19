@@ -64,9 +64,7 @@ func getResourceField(v interface{}) (f *structs.Field, err error) {
 func resourceId(v interface{}) (ret int, err error) {
 	var f *structs.Field
 
-	if f, err = getResourceField(v); err != nil {
-		return 0, err
-	} else {
+	if f, err = getResourceField(v); err == nil {
 		ret = f.Value().(int)
 	}
 
