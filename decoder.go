@@ -12,22 +12,31 @@ import (
 // Walk the input JSON, checking for any case where the field to be written is a
 // struct or pointer to a struct, but the source is deferred as defined by
 // checkDeferred(), and set id field to unmarshal later.
-func walkJson(parent *simplejson.Json) {
+func walkJson(parent *simplejson.Json) error {
 	switch getJsonNodeType(parent) {
 	case jsonObject:
-		for name, j := range getJsonFields(parent) {
-			if id, deferred := checkDeferred(j); deferred {
-				setDeferred(id, name, parent)
-			} else {
-				walkJson(j)
+		if fs, err := getJsonFields(parent); err != nil {
+			return err
+		} else {
+			for name, j := range fs {
+				if id, deferred := checkDeferred(j); deferred {
+					setDeferred(id, name, parent)
+				} else {
+					walkJson(j)
+				}
 			}
 		}
 	case jsonArray:
-		for _, j := range getJsonArray(parent) {
-			walkJson(j)
+		if js, err := getJsonArray(parent); err != nil {
+			return err
+		} else {
+			for _, j := range js {
+				walkJson(j)
+			}
 		}
 	}
 	// Other fields do not need to be checked.
+	return nil
 }
 
 // Check whether the specified object is in fact a deferred object - if so

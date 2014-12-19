@@ -120,11 +120,10 @@ func getJsonNodeType(j *simplejson.Json) jsonNodeType {
 	}
 }
 
-func getJsonFieldNames(j *simplejson.Json) (ret []string) {
-	if obj, err := j.Map(); err != nil {
-		// Caller should have checked.
-		panic(err)
-	} else {
+func getJsonFieldNames(j *simplejson.Json) (ret []string, err error) {
+	var obj map[string]interface{}
+
+	if obj, err = j.Map(); err == nil {
 		for name, _ := range obj {
 			ret = append(ret, name)
 		}
@@ -133,21 +132,24 @@ func getJsonFieldNames(j *simplejson.Json) (ret []string) {
 	return
 }
 
-func getJsonFields(j *simplejson.Json) map[string]*simplejson.Json {
-	ret := make(map[string]*simplejson.Json)
+func getJsonFields(j *simplejson.Json) (map[string]*simplejson.Json, error) {
+	if ns, err := getJsonFieldNames(j); err != nil {
+		return nil, err
+	} else {
+		ret := make(map[string]*simplejson.Json)
 
-	for _, name := range getJsonFieldNames(j) {
-		ret[name] = j.Get(name)
+		for _, name := range ns {
+			ret[name] = j.Get(name)
+		}
+
+		return ret, nil
 	}
-
-	return ret
 }
 
-func getJsonArray(j *simplejson.Json) (ret []*simplejson.Json) {
-	if arr, err := j.Array(); err != nil {
-		// Caller should have checked.
-		panic(err)
-	} else {
+func getJsonArray(j *simplejson.Json) (ret []*simplejson.Json, err error) {
+	var arr []interface{}
+
+	if arr, err = j.Array(); err == nil {
 		// TODO: This sucks. Don't want to remarshal just to use returned data
 		// though.
 		for i := 0; i < len(arr); i++ {

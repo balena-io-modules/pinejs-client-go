@@ -22,7 +22,7 @@ func (qt QueryOptionType) String() string {
 		return "$select"
 	}
 
-	panic(fmt.Sprintf("Unrecognised query option type %d", qt))
+	return fmt.Sprintf("?Unknown Type?: %d", qt)
 }
 
 type QueryOption struct {
@@ -44,7 +44,7 @@ func (qs QueryOptions) toMap() map[string][]string {
 	return ret
 }
 
-func parseQueryOption(queryOption, aVal interface{}) QueryOption {
+func parseQueryOption(queryOption, aVal interface{}) *QueryOption {
 	var strs []string
 
 	switch val := aVal.(type) {
@@ -53,10 +53,10 @@ func parseQueryOption(queryOption, aVal interface{}) QueryOption {
 	case []string:
 		strs = val
 	case nil:
-		panic("invalid type")
+		return nil
 	}
 
-	return QueryOption{queryOption.(QueryOptionType), strs}
+	return &QueryOption{queryOption.(QueryOptionType), strs}
 }
 
 // NewQueryOptions is a convenience function for inputting query options.
@@ -72,7 +72,11 @@ func NewQueryOptions(pairs ...interface{}) QueryOptions {
 
 	var ret QueryOptions
 	for i := 0; i < len(pairs)-1; i += 2 {
-		ret = append(ret, parseQueryOption(pairs[i], pairs[i+1]))
+		if ptr := parseQueryOption(pairs[i], pairs[i+1]); ptr == nil {
+			continue
+		} else {
+			ret = append(ret, *ptr)
+		}
 	}
 
 	return ret
