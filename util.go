@@ -10,7 +10,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/bitly/go-simplejson"
+	"bitbucket.org/rulemotion/pinejs-client-go/Godeps/_workspace/src/github.com/bitly/go-simplejson"
 )
 
 // oDataEncodeVals URL Encode values and separate with commas.
@@ -18,7 +18,7 @@ func oDataEncodeVals(strs []string) string {
 	encoded := make([]string, len(strs))
 
 	for i, str := range strs {
-		encoded[i] = url.QueryEscape(str)
+		encoded[i] = strings.Replace(url.QueryEscape(str), "+", "%20", -1)
 	}
 
 	return strings.Join(encoded, ",")

@@ -6,7 +6,7 @@ import (
 	"errors"
 	"reflect"
 
-	"github.com/bitly/go-simplejson"
+	"bitbucket.org/rulemotion/pinejs-client-go/Godeps/_workspace/src/github.com/bitly/go-simplejson"
 )
 
 // Walk the input JSON, checking for any case where the field to be written is a
