@@ -1,15 +1,27 @@
 # Pine.js Go Library
 
 This is a simple Go library for interacting with [pine.js][pine].
+Also includes object definitions to interact with the [resin.io][resin] API.
 
 ## Usage
 
 ```go
-var data foo
+import (
+	pinejs "bitbucket.org/rulemotion/pinejs-client-go"
+	"bitbucket.org/rulemotion/pinejs-client-go/resin"
+)
 
-if err := pinejs.Get(&data); err != nil {
-	log.Fatalln(err)
+func GetDatDevice() {
+	var device resin.Device{Id: 1234}
+	pineClient := pinejs.NewClient("https://api.resinstaging.io/ewa", "secretapikey")
+
+	if err := pineClient.Get(&device); err != nil {
+		log.Fatalln(err)
+	} else {
+		// device contains the device object with id 1234.
+	}
 }
 ```
 
 [pine]:https://bitbucket.org/rulemotion/pinejs/overview
+[resin]:https://resin.io
