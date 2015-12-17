@@ -7,8 +7,8 @@ Also includes object definitions to interact with the [resin.io][resin] API.
 
 ```go
 import (
-	pinejs "bitbucket.org/rulemotion/pinejs-client-go"
-	"bitbucket.org/rulemotion/pinejs-client-go/resin"
+	pinejs "github.com/resin-io/pinejs-client-go"
+	"github.com/resin-io/pinejs-client-go/resin"
 )
 
 func GetDatDevice() {
