@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"strings"
 
-	"bitbucket.org/rulemotion/pinejs-client-go/Godeps/_workspace/src/github.com/fatih/structs"
+	"github.com/resin-io/pinejs-client-go/Godeps/_workspace/src/github.com/fatih/structs"
 )
 
 // Retrieve resource name from input struct - if contains a pinejs tag, use

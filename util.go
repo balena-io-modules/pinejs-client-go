@@ -10,7 +10,7 @@ import (
 	"reflect"
 	"strings"
 
-	"bitbucket.org/rulemotion/pinejs-client-go/Godeps/_workspace/src/github.com/bitly/go-simplejson"
+	"github.com/resin-io/pinejs-client-go/Godeps/_workspace/src/github.com/bitly/go-simplejson"
 )
 
 // oDataEncodeVals URL Encode values and separate with commas.
