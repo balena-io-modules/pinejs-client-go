@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"bitbucket.org/rulemotion/pinejs-client-go/resin"
+	"github.com/resin-io/pinejs-client-go/resin"
 )
 
 func init() {
