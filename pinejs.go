@@ -138,7 +138,7 @@ func (c *Client) Read(v interface{}, queryOptions ...QueryOption) error {
 //
 // See Get for further details.
 func (c *Client) Create(v interface{}, queryOptions ...QueryOption) error {
-	if _, err := isPointerToStruct(v); err != nil {
+	if _, err := isPointerToStructOrMap(v); err != nil {
 		return err
 	}
 
@@ -161,12 +161,13 @@ func (c *Client) Create(v interface{}, queryOptions ...QueryOption) error {
 // are overwritten. If an entity with the specific id doesn't already exist, it
 // is created.
 //
-// Update expects v to be a pointer to a struct, and there to be an Id field set to
+// Update expects v to be a pointer to a struct or map, and there to be an Id field
+// (in the struct case) or "id" element (in the map case) set to
 // a valid id (i.e. non-zero.)
 //
 // See Get for further details.
 func (c *Client) Update(v interface{}) error {
-	if _, err := isPointerToStruct(v); err != nil {
+	if _, err := isPointerToStructOrMap(v); err != nil {
 		return err
 	}
 
@@ -188,12 +189,13 @@ func (c *Client) Update(v interface{}) error {
 // Patch updates a specific resource's entity given a specific id, updating only
 // the specified fields.
 //
-// Patch expects v to be a pointer to a struct, and there to be an Id field set to
+// Patch expects v to be a pointer to a struct or map, and there to be an Id field
+// (in the struct case) or "id" element (in the map case) set to
 // a valid id (i.e. non-zero.)
 //
 // See Get for further details.
 func (c *Client) Patch(v interface{}) error {
-	if _, err := isPointerToStruct(v); err != nil {
+	if _, err := isPointerToStructOrMap(v); err != nil {
 		return err
 	}
 
@@ -219,7 +221,7 @@ func (c *Client) Patch(v interface{}) error {
 //
 // See Get for further details.
 func (c *Client) Delete(v interface{}) error {
-	if _, err := isPointerToStruct(v); err != nil {
+	if _, err := isPointerToStructOrMap(v); err != nil {
 		return err
 	}
 

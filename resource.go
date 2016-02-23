@@ -25,14 +25,26 @@ func resourceNameFromStruct(v interface{}) string {
 	return strings.ToLower(structs.Name(v))
 }
 
+func resourceNameFromMap(v interface{}) (string, error) {
+	if m, ok := v.(map[string]interface{}); !ok {
+		return "", errors.New("Invalid map type")
+	} else if val, ok := m["pinejs"].(string); ok && val != "" {
+		return val, nil
+	} else {
+		return "", errors.New("Failed to retrieve resource name from map")
+	}
+}
+
 // Unwinds pointers, slices, and slices of pointers, etc. until we get to a
-// struct then we hand off to resourceNameFromStruct.
+// struct then we hand off to resourceNameFromStruct, or the equivalent with a map.
 func resourceName(v interface{}) (string, error) {
 	ty := reflect.TypeOf(v)
 
 	switch ty.Kind() {
 	case reflect.Struct:
 		return resourceNameFromStruct(v), nil
+	case reflect.Map:
+		return resourceNameFromMap(v)
 	case reflect.Ptr, reflect.Slice:
 		// Create new pointer to pointer/slice type.
 		ptr := reflect.New(ty.Elem())
@@ -42,7 +54,7 @@ func resourceName(v interface{}) (string, error) {
 		return resourceName(el)
 	}
 
-	return "", fmt.Errorf("tried to retrieve resource name from non-struct %s",
+	return "", fmt.Errorf("tried to retrieve resource name from non-struct and non-map %s",
 		ty.Kind())
 }
 
@@ -60,13 +72,85 @@ func getResourceField(v interface{}) (f *structs.Field, err error) {
 	return
 }
 
+func getIdFromMap(m map[string]interface{}) (ret int, err error) {
+	if val, ok := m["id"].(int); !ok || val == 0 {
+		err = errors.New("Invalid id in map")
+	} else {
+		ret = val
+	}
+	return
+}
+
 // Retrieve Id field from interface.
 func resourceId(v interface{}) (ret int, err error) {
 	var f *structs.Field
+	invalidTypeErr := errors.New("Not a struct, map, or pointer to either")
+	ty := reflect.TypeOf(v)
 
-	if f, err = getResourceField(v); err == nil {
-		ret = f.Value().(int)
+	switch ty.Kind() {
+	case reflect.Struct:
+		if f, err = getResourceField(v); err == nil {
+			ret = f.Value().(int)
+		}
+	case reflect.Map:
+		if m, ok := v.(map[string]interface{}); !ok {
+			err = errors.New("Invalid map")
+		} else {
+			return getIdFromMap(m)
+		}
+	case reflect.Ptr:
+		// Create new pointer to pointer type, and deref to find the map or struct itself
+		ptr := reflect.New(ty.Elem())
+		el := ptr.Elem().Interface()
+		return resourceId(el)
+	default:
+		err = invalidTypeErr
 	}
 
 	return
+}
+
+// Determine whether the struct's id will be omitted in json encoding.
+func isIdOmitted(v interface{}) (bool, error) {
+
+	if structs.IsStruct(v) {
+		if f, err := getResourceField(v); err != nil {
+			return false, err
+		} else if jsonTag := f.Tag("json"); jsonTag == "" {
+			// No json tag means the id field won't be ommitted.
+			return false, nil
+		} else {
+			// getResourceField() ensures this is an int.
+			id := f.Value().(int)
+			// Json tags are comma separated. 'omitempty' means id == 0 -> id field
+			// not included in generated json. Also note spacing, like "id,
+			// omitempty" is significant and prevents a tag from taking effect so no
+			// need for trimming.
+			//
+			// See http://golang.org/pkg/encoding/json/#Marshal
+			for _, field := range strings.Split(jsonTag, ",") {
+				if field == "omitempty" && id == 0 {
+					return true, nil
+				}
+			}
+		}
+	} else {
+		ty := reflect.TypeOf(v)
+		switch ty.Kind() {
+		case reflect.Map:
+			if m, ok := v.(map[string]interface{}); !ok {
+				return false, errors.New("Invalid map")
+			} else if _, e := getIdFromMap(m); e != nil {
+				return true, nil
+			}
+		case reflect.Ptr:
+			// Create new pointer to pointer type, and deref to find the map or struct itself
+			ptr := reflect.New(ty.Elem())
+			el := ptr.Elem().Interface()
+			return isIdOmitted(el)
+		}
+	}
+
+	// Id field exists, no 'omitempty' tag so not omitted.
+	return false, nil
 }
