@@ -45,10 +45,11 @@ func resourceName(v interface{}) (string, error) {
 		return resourceNameFromStruct(v), nil
 	case reflect.Map:
 		return resourceNameFromMap(v)
-	case reflect.Ptr, reflect.Slice:
+	case reflect.Ptr:
+		return resourceName(reflect.Indirect(reflect.ValueOf(v)).Interface())
+	case reflect.Slice:
 		// Create new pointer to pointer/slice type.
 		ptr := reflect.New(ty.Elem())
-
 		// Deref the pointer and recurse on that value until we get to a struct.
 		el := ptr.Elem().Interface()
 		return resourceName(el)
@@ -73,8 +74,8 @@ func getResourceField(v interface{}) (f *structs.Field, err error) {
 }
 
 func getIdFromMap(m map[string]interface{}) (ret int, err error) {
-	if val, ok := m["id"].(int); !ok || val == 0 {
-		err = errors.New("Invalid id in map")
+	if val, ok := m["id"].(int); !ok {
+		ret = 0
 	} else {
 		ret = val
 	}
@@ -88,21 +89,18 @@ func resourceId(v interface{}) (ret int, err error) {
 	ty := reflect.TypeOf(v)
 
 	switch ty.Kind() {
-	case reflect.Struct:
-		if f, err = getResourceField(v); err == nil {
-			ret = f.Value().(int)
-		}
 	case reflect.Map:
 		if m, ok := v.(map[string]interface{}); !ok {
 			err = errors.New("Invalid map")
 		} else {
 			return getIdFromMap(m)
 		}
+	case reflect.Struct:
+		if f, err = getResourceField(v); err == nil {
+			ret = f.Value().(int)
+		}
 	case reflect.Ptr:
-		// Create new pointer to pointer type, and deref to find the map or struct itself
-		ptr := reflect.New(ty.Elem())
-		el := ptr.Elem().Interface()
-		return resourceId(el)
+		return resourceId(reflect.Indirect(reflect.ValueOf(v)).Interface())
 	default:
 		err = invalidTypeErr
 	}
@@ -138,16 +136,13 @@ func isIdOmitted(v interface{}) (bool, error) {
 		ty := reflect.TypeOf(v)
 		switch ty.Kind() {
 		case reflect.Map:
-			if m, ok := v.(map[string]interface{}); !ok {
+			if _, ok := v.(map[string]interface{}); !ok {
 				return false, errors.New("Invalid map")
-			} else if _, e := getIdFromMap(m); e != nil {
-				return true, nil
+			} else {
+				return false, nil
 			}
 		case reflect.Ptr:
-			// Create new pointer to pointer type, and deref to find the map or struct itself
-			ptr := reflect.New(ty.Elem())
-			el := ptr.Elem().Interface()
-			return isIdOmitted(el)
+			return isIdOmitted(reflect.Indirect(reflect.ValueOf(v)).Interface())
 		}
 	}
 

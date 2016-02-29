@@ -2,36 +2,55 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"strconv"
 
-	"pinejs-client-go"
-	"pinejs-client-go/resin"
+	"github.com/resin-io/pinejs-client-go"
+	"github.com/resin-io/pinejs-client-go/resin"
 )
 
 func main() {
 	resinApi := &pinejs.Client{
-		Endpoint: "https://alpha.resin.io/ewa",
-		APIKey:   "bananasbananas",
+		Endpoint: os.Getenv("API_ENDPOINT"),
+		APIKey:   os.Getenv("API_KEY"),
 	}
 
-	// var userApps []resin.Application
-	myApp := resin.Application{Id: 338}
+	var userApps []resin.Application
+	var err error
+	appId, _ := strconv.Atoi(os.Getenv("APP_ID"))
+	userId, _ := strconv.Atoi(os.Getenv("USER_ID"))
 
-	resinApi.List(&userApps)
+	myApp := resin.Application{Id: appId}
 
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
+	fmt.Println("Getting all apps")
+	err = resinApi.List(&userApps)
 
-	// for _, app := range userApps {
-	// 	fmt.Println(app.AppName)
-	// 	for _, device := range app.Devices {
-	// 		fmt.Println("-->", device)
-	// 	}
-	// }
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Printf("Got apps: %+v\n", userApps)
+	}
 
 	fmt.Println("Getting one Application")
 
 	resinApi.Get(&myApp)
 
-	fmt.Println(myApp)
+	fmt.Printf("%+v\n", myApp)
+
+	fmt.Println("Creating a device")
+	dev := make(map[string]interface{})
+
+	dev["pinejs"] = "device"
+	dev["uuid"] = os.Getenv("TEST_UUID")
+	dev["device_type"] = "raspberry-pi2"
+	dev["application"] = appId
+	dev["user"] = userId
+	fmt.Printf("%+v", dev)
+
+	err = resinApi.Create(&dev)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Printf("Created device: %v", dev)
+	}
 }
