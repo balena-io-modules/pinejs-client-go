@@ -48,11 +48,20 @@ func resourceName(v interface{}) (string, error) {
 	case reflect.Ptr:
 		return resourceName(reflect.Indirect(reflect.ValueOf(v)).Interface())
 	case reflect.Slice:
-		// Create new pointer to pointer/slice type.
-		ptr := reflect.New(ty.Elem())
-		// Deref the pointer and recurse on that value until we get to a struct.
-		el := ptr.Elem().Interface()
-		return resourceName(el)
+		if ty.Elem().Kind() == reflect.Struct {
+			// Create new pointer to pointer/slice type.
+			ptr := reflect.New(ty.Elem())
+			// Deref the pointer and recurse on that value until we get to a struct.
+			el := ptr.Elem().Interface()
+			return resourceName(el)
+		} else if ty.Elem().Kind() == reflect.Map {
+			theSlice := reflect.ValueOf(v)
+			if theSlice.Len() == 0 {
+				return "", errors.New("Slice of maps must have non-zero length")
+			} else {
+				return resourceName(theSlice.Index(0).Interface())
+			}
+		}
 	}
 
 	return "", fmt.Errorf("tried to retrieve resource name from non-struct and non-map %s",

@@ -85,13 +85,13 @@ func isPointerToStructOrMap(v interface{}) (bool, error) {
 	return true, nil
 }
 
-func isPointerToSliceStructs(v interface{}) (bool, error) {
+func isPointerToSliceStructsOrMaps(v interface{}) (bool, error) {
 	if el, err := ptrType(v); err != nil {
 		return false, err
 	} else if el.Kind() != reflect.Slice {
 		return false, errors.New("not a pointer to a slice")
-	} else if el.Elem().Kind() != reflect.Struct {
-		return false, errors.New("not a pointer to a slice of structs")
+	} else if el.Elem().Kind() != reflect.Struct && el.Elem().Kind() != reflect.Map {
+		return false, errors.New("not a pointer to a slice of structs or maps")
 	}
 
 	return true, nil

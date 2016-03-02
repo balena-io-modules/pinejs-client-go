@@ -31,11 +31,28 @@ func main() {
 		fmt.Printf("Got apps: %+v\n", userApps)
 	}
 
+	userAppMaps := make([]map[string]interface{}, 1)
+	userAppMaps[0] = make(map[string]interface{})
+	userAppMaps[0]["pinejs"] = "application"
+	fmt.Println("Getting all apps with a slice of maps")
+	err = resinApi.List(&userAppMaps)
+
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Printf("Got apps: %+v\n", userAppMaps)
+	}
+
 	fmt.Println("Getting one Application")
 
 	resinApi.Get(&myApp)
 
 	fmt.Printf("%+v\n", myApp)
+
+	fmt.Println("Getting one Application with a map")
+	appMap := map[string]interface{}{"pinejs": "application", "id": appId}
+	resinApi.Get(&appMap)
+	fmt.Printf("%+v\n", appMap)
 
 	fmt.Println("Creating a device")
 	dev := make(map[string]interface{})
