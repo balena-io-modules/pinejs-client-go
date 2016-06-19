@@ -62,12 +62,15 @@ func NewClient(endpoint, apiKey string) *Client {
 // it into the provided v interface. Optionally, query options can be set on the
 // data.
 //
-// Get expects v to be a pointer to a struct, and there to be an Id field set to
-// a valid id (i.e. non-zero.)
+// Get expects v to either one of:
+//   * a pointer to a struct, and there to be an Id field set to
+//     a valid id (i.e. non-zero.)
+//   * a pointer to a map[string]interface{}, with a "pinejs" field set to the
+//     resource name and an "id" field set to a non-zero integer
 //
-// Get determines the name of resource to retrieve from a pinejs tag placed on
-// any field in the struct, or if this is not present, the struct name in lower
-// case.
+// If v is a struct, get determines the name of resource to retrieve from a pinejs
+// tag placed on any field in the struct, or if this is not present, the struct name
+// in lower case.
 //
 // Data is decoded using the standard library's encoding/json package, so ensure
 // to export all fields you wish to decode to and set json tags as appropriate.
@@ -80,7 +83,7 @@ func NewClient(endpoint, apiKey string) *Client {
 // the library will simply set the Id field and expect you to manually request
 // the rest of the struct's data.
 func (c *Client) Get(v interface{}, queryOptions ...QueryOption) error {
-	if _, err := isPointerToStruct(v); err != nil {
+	if _, err := isPointerToStructOrMap(v); err != nil {
 		return err
 	}
 
@@ -102,11 +105,12 @@ func (c *Client) Get(v interface{}, queryOptions ...QueryOption) error {
 // List returns all elements of a specific resource according to the query
 // options specified, if any.
 //
-// List expects v to be a pointer to a slice of structs.
+// List expects v to be a pointer to a slice of structs or maps.
+// In the map case, the first element of the slice must exist and have a "pinejs" field with the resource name.
 //
 // See Get for further details.
 func (c *Client) List(v interface{}, queryOptions ...QueryOption) error {
-	if _, err := isPointerToSliceStructs(v); err != nil {
+	if _, err := isPointerToSliceStructsOrMaps(v); err != nil {
 		return err
 	} else if name, err := resourceName(v); err != nil {
 		return err
@@ -118,27 +122,27 @@ func (c *Client) List(v interface{}, queryOptions ...QueryOption) error {
 }
 
 // Read choose to Get or List depending on the type of v - Get if v is a pointer
-// to a struct, List if v is a pointer to a slice.
+// to a struct or map, List if v is a pointer to a slice.
 //
 // See Get and List for further details.
 func (c *Client) Read(v interface{}, queryOptions ...QueryOption) error {
-	if isSlice, _ := isPointerToSliceStructs(v); isSlice {
+	if isSlice, _ := isPointerToSliceStructsOrMaps(v); isSlice {
 		return c.List(v, queryOptions...)
-	} else if isStruct, _ := isPointerToStruct(v); isStruct {
+	} else if isStructOrMap, _ := isPointerToStructOrMap(v); isStructOrMap {
 		return c.Get(v, queryOptions...)
 	}
 
-	return errors.New("not a pointer to a struct or slice")
+	return errors.New("not a pointer to a struct, map or slice")
 }
 
 // Create generates a new entity of a specific resource, and populates fields as
 // they are in the database, including Id.
 //
-// Create expects v to be a pointer to a struct.
+// Create expects v to be a pointer to a struct or map.
 //
 // See Get for further details.
 func (c *Client) Create(v interface{}, queryOptions ...QueryOption) error {
-	if _, err := isPointerToStruct(v); err != nil {
+	if _, err := isPointerToStructOrMap(v); err != nil {
 		return err
 	}
 
@@ -161,12 +165,13 @@ func (c *Client) Create(v interface{}, queryOptions ...QueryOption) error {
 // are overwritten. If an entity with the specific id doesn't already exist, it
 // is created.
 //
-// Update expects v to be a pointer to a struct, and there to be an Id field set to
+// Update expects v to be a pointer to a struct or map, and there to be an Id field
+// (in the struct case) or "id" element (in the map case) set to
 // a valid id (i.e. non-zero.)
 //
 // See Get for further details.
 func (c *Client) Update(v interface{}) error {
-	if _, err := isPointerToStruct(v); err != nil {
+	if _, err := isPointerToStructOrMap(v); err != nil {
 		return err
 	}
 
@@ -188,12 +193,13 @@ func (c *Client) Update(v interface{}) error {
 // Patch updates a specific resource's entity given a specific id, updating only
 // the specified fields.
 //
-// Patch expects v to be a pointer to a struct, and there to be an Id field set to
+// Patch expects v to be a pointer to a struct or map, and there to be an Id field
+// (in the struct case) or "id" element (in the map case) set to
 // a valid id (i.e. non-zero.)
 //
 // See Get for further details.
 func (c *Client) Patch(v interface{}) error {
-	if _, err := isPointerToStruct(v); err != nil {
+	if _, err := isPointerToStructOrMap(v); err != nil {
 		return err
 	}
 
@@ -214,12 +220,13 @@ func (c *Client) Patch(v interface{}) error {
 
 // Deletes deletes a specific resource's entity given a specific id.
 //
-// Delete expects v to be a pointer to a struct, and there to be an Id field set to
+// Delete expects v to be a pointer to a struct or map, and there to be an Id field
+// (in the struct case) or "id" element (in the map case) set to
 // a valid id (i.e. non-zero.)
 //
 // See Get for further details.
 func (c *Client) Delete(v interface{}) error {
-	if _, err := isPointerToStruct(v); err != nil {
+	if _, err := isPointerToStructOrMap(v); err != nil {
 		return err
 	}
 

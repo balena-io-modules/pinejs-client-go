@@ -75,13 +75,23 @@ func isPointerToStruct(v interface{}) (bool, error) {
 	return true, nil
 }
 
-func isPointerToSliceStructs(v interface{}) (bool, error) {
+func isPointerToStructOrMap(v interface{}) (bool, error) {
+	if el, err := ptrType(v); err != nil {
+		return false, err
+	} else if el.Kind() != reflect.Struct && el.Kind() != reflect.Map {
+		return false, errors.New("not a pointer to a struct or map")
+	}
+
+	return true, nil
+}
+
+func isPointerToSliceStructsOrMaps(v interface{}) (bool, error) {
 	if el, err := ptrType(v); err != nil {
 		return false, err
 	} else if el.Kind() != reflect.Slice {
 		return false, errors.New("not a pointer to a slice")
-	} else if el.Elem().Kind() != reflect.Struct {
-		return false, errors.New("not a pointer to a slice of structs")
+	} else if el.Elem().Kind() != reflect.Struct && el.Elem().Kind() != reflect.Map {
+		return false, errors.New("not a pointer to a slice of structs or maps")
 	}
 
 	return true, nil
@@ -158,32 +168,4 @@ func getJsonArray(j *simplejson.Json) (ret []*simplejson.Json, err error) {
 	}
 
 	return
-}
-
-// Determine whether the struct's id will be omitted in json encoding.
-func isIdOmitted(v interface{}) (bool, error) {
-	if f, err := getResourceField(v); err != nil {
-		return false, err
-	} else if jsonTag := f.Tag("json"); jsonTag == "" {
-		// No json tag means the id field won't be ommitted.
-		return false, nil
-	} else {
-		// getResourceField() ensures this is an int.
-		id := f.Value().(int)
-
-		// Json tags are comma separated. 'omitempty' means id == 0 -> id field
-		// not included in generated json. Also note spacing, like "id,
-		// omitempty" is significant and prevents a tag from taking effect so no
-		// need for trimming.
-		//
-		// See http://golang.org/pkg/encoding/json/#Marshal
-		for _, field := range strings.Split(jsonTag, ",") {
-			if field == "omitempty" && id == 0 {
-				return true, nil
-			}
-		}
-	}
-
-	// Id field exists, no 'omitempty' tag so not omitted.
-	return false, nil
 }
