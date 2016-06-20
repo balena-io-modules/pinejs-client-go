@@ -69,6 +69,8 @@ func (c *Client) request(method, path string, v interface{}, queryOptions QueryO
 
 		if c.APIKey != "" {
 			query["apikey"] = []string{c.APIKey}
+		} else if c.Token != "" {
+			req.Header.Set("Authorization", "Bearer "+c.Token)
 		}
 
 		preprocessRequest(req, path, query)

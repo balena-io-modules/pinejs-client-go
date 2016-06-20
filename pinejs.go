@@ -49,13 +49,17 @@ func ShowDebugOutput() {
 
 // Client represents an HTTP client to a pine.js server.
 type Client struct {
-	APIKey, Endpoint string
-	reader           io.Reader
+	APIKey, Endpoint, Token string
+	reader                  io.Reader
 }
 
 // NewClient returns a client initialised to the provided endpoint and API key.
 func NewClient(endpoint, apiKey string) *Client {
-	return &Client{apiKey, endpoint, nil}
+	return &Client{apiKey, endpoint, "", nil}
+}
+
+func NewClientWithToken(endpoint, token string) *Client {
+	return &Client{"", endpoint, token, nil}
 }
 
 // Get returns data from the pine.js client for a particular resource and places
