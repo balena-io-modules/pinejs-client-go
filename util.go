@@ -6,23 +6,11 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net/url"
 	"reflect"
 	"strings"
 
 	"github.com/resin-io/pinejs-client-go/Godeps/_workspace/src/github.com/bitly/go-simplejson"
 )
-
-// oDataEncodeVals URL Encode values and separate with commas.
-func oDataEncodeVals(strs []string) string {
-	encoded := make([]string, len(strs))
-
-	for i, str := range strs {
-		encoded[i] = strings.Replace(url.QueryEscape(str), "+", "%20", -1)
-	}
-
-	return strings.Join(encoded, ",")
-}
 
 // encodeQuery encodes query values, working around a net/url issue whereby keys
 // get encoded as well as values. We only want values encoded, otherwise OData
@@ -38,7 +26,7 @@ func encodeQuery(query map[string][]string) string {
 			continue
 		}
 
-		tuple := key + "=" + oDataEncodeVals(vals)
+		tuple := key + "=" + strings.Replace(strings.Join(vals, ","), " ", "%20", -1)
 		tuples = append(tuples, tuple)
 	}
 
