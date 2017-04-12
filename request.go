@@ -62,11 +62,8 @@ func (c *Client) request(method, path string, v interface{}, queryOptions QueryO
 
 		query := make(map[string][]string)
 		if queryOptions != nil {
-			for key, val := range queryOptions.toMap() {
-				query[key] = val
-			}
+			query = queryOptions.toMap(true)
 		}
-
 		if c.APIKey != "" {
 			query["apikey"] = []string{c.APIKey}
 		} else if c.Token != "" {

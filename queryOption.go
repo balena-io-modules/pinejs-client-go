@@ -1,6 +1,10 @@
 package pinejs
 
-import "fmt"
+import (
+	"fmt"
+	"net/url"
+	"strings"
+)
 
 // QueryOptionType specifies the OData query option you wish to use.
 type QueryOptionType int
@@ -28,20 +32,39 @@ func (qt QueryOptionType) String() string {
 type QueryOption struct {
 	Type    QueryOptionType
 	Content []string
+	Raw     bool
 }
 
 // QueryOptions is a collection of OData query options.
 type QueryOptions []QueryOption
 
-func (qs QueryOptions) toMap() map[string][]string {
+func (qs QueryOptions) toMap(encode bool) map[string][]string {
 	ret := make(map[string][]string)
 
 	for _, q := range qs {
 		name := q.Type.String()
-		ret[name] = append(ret[name], q.Content...)
+		var data []string
+		if encode && !q.Raw {
+			data = q.Encode()
+		} else {
+			data = q.Content
+		}
+		ret[name] = append(ret[name], data...)
 	}
 
 	return ret
+}
+
+func (q QueryOption) Encode() []string {
+	if q.Raw {
+		return q.Content
+	}
+
+	encoded := make([]string, len(q.Content))
+	for i, str := range q.Content {
+		encoded[i] = strings.Replace(url.QueryEscape(str), "+", "%20", -1)
+	}
+	return encoded
 }
 
 func parseQueryOption(queryOption, aVal interface{}) *QueryOption {
@@ -56,7 +79,7 @@ func parseQueryOption(queryOption, aVal interface{}) *QueryOption {
 		return nil
 	}
 
-	return &QueryOption{queryOption.(QueryOptionType), strs}
+	return &QueryOption{queryOption.(QueryOptionType), strs, false}
 }
 
 // NewQueryOptions is a convenience function for inputting query options.
